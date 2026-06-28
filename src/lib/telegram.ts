@@ -6,6 +6,23 @@ interface TelegramConfig {
   chatId: string
 }
 
+// ============================================================
+// Telegram's "HTML" parse_mode only requires escaping &, < and >
+// (https://core.telegram.org/bots/api#html-style). Any customer-
+// supplied text (name, address, notes, cake messages, etc.) MUST
+// be passed through this before being interpolated into a
+// message, otherwise a customer could inject their own <a>, <b>,
+// or other tags — or break message formatting entirely — via an
+// order field. Only call this on USER-SUPPLIED values, never on
+// the literal HTML tags we add ourselves (e.g. <b>...</b>).
+// ============================================================
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
 async function sendTelegramMessage(config: TelegramConfig, message: string): Promise<boolean> {
   if (!config.botToken || !config.chatId) {
     console.warn('[Telegram] Bot token or chat ID not configured. Skipping notification.')
@@ -46,26 +63,26 @@ export async function sendNewOrderNotification(
   const itemsList = order.items
     .map(
       (item) =>
-        `  • ${item.product_name} (${item.variant_name}) × ${item.quantity} = ${formatPrice(
+        `  • ${escapeHtml(item.product_name)} (${escapeHtml(item.variant_name)}) × ${item.quantity} = ${formatPrice(
           item.price * item.quantity
-        )}${item.cake_message ? `\n    💌 Message: "${item.cake_message}"` : ''}`
+        )}${item.cake_message ? `\n    💌 Message: "${escapeHtml(item.cake_message)}"` : ''}`
     )
     .join('\n')
 
   const message = `
 🎂 <b>New Order Received!</b>
 
-📋 <b>Order:</b> ${order.order_number}
-👤 <b>Customer:</b> ${order.customer_name}
-📞 <b>Phone:</b> ${order.customer_phone}
-📍 <b>Address:</b> ${order.delivery_address}
+📋 <b>Order:</b> ${escapeHtml(order.order_number)}
+👤 <b>Customer:</b> ${escapeHtml(order.customer_name)}
+📞 <b>Phone:</b> ${escapeHtml(order.customer_phone)}
+📍 <b>Address:</b> ${escapeHtml(order.delivery_address)}
 💳 <b>Payment:</b> ${PAYMENT_METHOD_LABELS[order.payment_method] ?? order.payment_method}
 
 🛒 <b>Items:</b>
 ${itemsList}
 
 💰 <b>Total:</b> ${formatPrice(order.total_amount)}
-${order.order_note ? `\n📝 <b>Note:</b> ${order.order_note}` : ''}
+${order.order_note ? `\n📝 <b>Note:</b> ${escapeHtml(order.order_note)}` : ''}
 
 ⏰ <i>${new Date(order.created_at).toLocaleString('en-US', { timeZone: 'Africa/Addis_Ababa' })}</i>
   `.trim()
@@ -90,10 +107,10 @@ export async function sendOrderStatusUpdateNotification(
   const message = `
 ${emoji} <b>Order Status Updated</b>
 
-📋 <b>Order:</b> ${order.order_number}
-👤 <b>Customer:</b> ${order.customer_name}
+📋 <b>Order:</b> ${escapeHtml(order.order_number)}
+👤 <b>Customer:</b> ${escapeHtml(order.customer_name)}
 🔄 <b>New Status:</b> ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-${order.cancel_reason ? `\n❌ <b>Cancel Reason:</b> ${order.cancel_reason}` : ''}
+${order.cancel_reason ? `\n❌ <b>Cancel Reason:</b> ${escapeHtml(order.cancel_reason)}` : ''}
   `.trim()
 
   return sendTelegramMessage(config, message)
