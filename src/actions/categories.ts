@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/actions/auth'
 import { categoryFormSchema } from '@/lib/validations'
 import type { ActionResult, Category } from '@/types'
 
@@ -32,10 +33,8 @@ export async function getAllCategories(): Promise<Category[]> {
 }
 
 export async function createCategory(formData: unknown): Promise<ActionResult<{ id: string }>> {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const parsed = categoryFormSchema.safeParse(formData)
   if (!parsed.success) {
@@ -77,10 +76,8 @@ export async function updateCategory(
   id: string,
   formData: unknown
 ): Promise<ActionResult<void>> {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const parsed = categoryFormSchema.safeParse(formData)
   if (!parsed.success) {
@@ -118,10 +115,8 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(id: string): Promise<ActionResult<void>> {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const admin = createAdminClient()
 
@@ -145,10 +140,8 @@ export async function uploadCategoryImage(
   categoryId: string,
   file: File
 ): Promise<ActionResult<{ url: string }>> {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const admin = createAdminClient()
 
