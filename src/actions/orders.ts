@@ -273,6 +273,11 @@ export async function updateOrderStatus(
 }
 
 export async function getDashboardStats() {
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) {
+    return { total_orders: 0, pending_orders: 0, delivered_orders: 0, total_products: 0 }
+  }
+
   const admin = createAdminClient()
   const [
     { count: total_orders },
