@@ -104,3 +104,42 @@ export async function getAdminUser() {
   if (!user || user.role !== 'admin') return null
   return user
 }
+
+// ============================================================
+// ADMIN GUARD — call this at the top of every admin-only
+// server action BEFORE touching the admin (service-role) client.
+//
+// Usage:
+//   const adminCheck = await requireAdmin()
+//   if (!adminCheck.ok) return adminCheck.error
+//
+// Without this, an action that uses createAdminClient() bypasses
+// RLS entirely, so checking `if (!user)` alone is NOT enough —
+// it only confirms someone is logged in, not that they're an
+// admin. Any authenticated customer could otherwise call the
+// action directly and mutate admin-only data.
+// ============================================================
+export type AdminCheckResult =
+  | { ok: true; userId: string }
+  | { ok: false; error: ActionResult<never> }
+
+export async function requireAdmin(): Promise<AdminCheckResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { ok: false, error: { success: false, error: 'Unauthorized' } }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'admin') {
+    return { ok: false, error: { success: false, error: 'Forbidden' } }
+  }
+
+  return { ok: true, userId: user.id }
+}
