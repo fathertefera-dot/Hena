@@ -96,7 +96,42 @@ export async function getCurrentUser() {
     .eq('id', user.id)
     .single()
 
-  return profile
+  if (profile) return profile
+
+  // ------------------------------------------------------------
+  // Defensive fallback (fixes the login-loop bug):
+  // handle_new_user() normally creates this row at signup time.
+  // If it's missing — e.g. the account existed before that
+  // trigger was added, or the trigger migration was never run —
+  // the user has a perfectly valid auth session but no profile
+  // row. Previously this function returned null in that case,
+  // which made pages like /account treat a logged-in user as
+  // logged-out, bouncing them back to /login forever. Self-heal
+  // by creating the missing row now.
+  // ------------------------------------------------------------
+  const { data: newProfile } = await supabase
+    .from('profiles')
+    .insert({
+      id: user.id,
+      email: user.email ?? '',
+      full_name: (user.user_metadata?.full_name as string | undefined) ?? '',
+      role: 'customer',
+    })
+    .select('*')
+    .single()
+
+  if (newProfile) return newProfile
+
+  // Insert failed — most likely a race with another concurrent
+  // request that created the row a moment earlier. Read once more
+  // before giving up.
+  const { data: retryProfile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  return retryProfile ?? null
 }
 
 export async function getAdminUser() {
