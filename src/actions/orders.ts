@@ -6,7 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { checkoutSchema, orderStatusSchema } from '@/lib/validations'
 import { requireAdmin } from '@/actions/auth'
 import { clearCart, getCart } from '@/actions/cart'
-import { sendNewOrderNotification, sendOrderStatusUpdateNotification, sendTelegramPhoto } from '@/lib/telegram'
+import { sendNewOrderNotification, sendOrderStatusUpdateNotification, sendTelegramPhoto, escapeHtml } from '@/lib/telegram'
 import { ORDERS_PER_PAGE } from '@/lib/utils'
 import { PAYMENT_METHOD_LABELS, formatPrice } from '@/lib/utils'
 import type { ActionResult, Order, OrderFilters, PaginatedResult } from '@/types'
@@ -116,10 +116,10 @@ export async function createOrder(
     const caption = `
 🎂 <b>New Order Received!</b>
 
-📋 <b>Order:</b> ${order.order_number}
-👤 <b>Customer:</b> ${parsed.data.full_name}
-📞 <b>Phone:</b> ${parsed.data.phone}
-📍 <b>Address:</b> ${parsed.data.delivery_address}
+📋 <b>Order:</b> ${escapeHtml(order.order_number)}
+👤 <b>Customer:</b> ${escapeHtml(parsed.data.full_name)}
+📞 <b>Phone:</b> ${escapeHtml(parsed.data.phone)}
+📍 <b>Address:</b> ${escapeHtml(parsed.data.delivery_address)}
 💳 <b>Payment:</b> ${PAYMENT_METHOD_LABELS[parsed.data.payment_method] ?? parsed.data.payment_method}
 💰 <b>Total:</b> ${formatPrice(totalAmount)}
     `.trim()
