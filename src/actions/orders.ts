@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkoutSchema, orderStatusSchema } from '@/lib/validations'
+import { requireAdmin } from '@/actions/auth'
 import { clearCart, getCart } from '@/actions/cart'
 import { sendNewOrderNotification, sendOrderStatusUpdateNotification, sendTelegramPhoto } from '@/lib/telegram'
 import { ORDERS_PER_PAGE } from '@/lib/utils'
@@ -238,9 +239,8 @@ export async function updateOrderStatus(
   orderId: string,
   formData: unknown
 ): Promise<ActionResult<void>> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const parsed = orderStatusSchema.safeParse(formData)
   if (!parsed.success) return { success: false, error: 'Invalid status' }
