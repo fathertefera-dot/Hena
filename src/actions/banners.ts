@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/actions/auth'
 import { bannerFormSchema } from '@/lib/validations'
 import type { ActionResult, Banner } from '@/types'
 
@@ -35,10 +36,8 @@ export async function createBanner(
   formData: unknown,
   imageFile: File | null
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const parsed = bannerFormSchema.safeParse(formData)
   if (!parsed.success) {
@@ -95,10 +94,8 @@ export async function updateBanner(
   formData: unknown,
   imageFile: File | null
 ): Promise<ActionResult<void>> {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const parsed = bannerFormSchema.safeParse(formData)
   if (!parsed.success) {
@@ -144,10 +141,8 @@ export async function updateBanner(
 }
 
 export async function deleteBanner(id: string): Promise<ActionResult<void>> {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const admin = createAdminClient()
 
