@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/actions/auth'
 import { productFormSchema } from '@/lib/validations'
 import { PRODUCTS_PER_PAGE } from '@/lib/utils'
 import type {
@@ -239,12 +240,8 @@ export async function getAdminProductById(id: string): Promise<Product | null> {
 export async function createProduct(
   formData: unknown
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const parsed = productFormSchema.safeParse(formData)
   if (!parsed.success) {
@@ -306,12 +303,8 @@ export async function updateProduct(
   id: string,
   formData: unknown
 ): Promise<ActionResult<void>> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const parsed = productFormSchema.safeParse(formData)
   if (!parsed.success) {
@@ -373,12 +366,8 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(id: string): Promise<ActionResult<void>> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const admin = createAdminClient()
 
@@ -399,12 +388,8 @@ export async function uploadProductImage(
   file: File,
   sortOrder: number
 ): Promise<ActionResult<{ url: string; id: string }>> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const admin = createAdminClient()
 
@@ -441,12 +426,8 @@ export async function uploadProductImage(
 }
 
 export async function deleteProductImage(imageId: string): Promise<ActionResult<void>> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return adminCheck.error
 
   const admin = createAdminClient()
 
