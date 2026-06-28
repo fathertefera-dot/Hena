@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Iku Sweet Cake Design System */
+    --background: 30 100% 97%;        /* Warm ivory #FFF8F0 */
+    --foreground: 10 35% 19%;         /* Dark chocolate #4A2C2A */
+
+    --card: 30 60% 96%;              /* Blush #FBF3EA */
+    --card-foreground: 10 35% 19%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 10 35% 19%;
+
+    --primary: 5 43% 60%;            /* Rosewood #C47B6E */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 30 30% 91%;         /* Warm sand */
+    --secondary-foreground: 10 35% 19%;
+
+    --muted: 30 20% 93%;
+    --muted-foreground: 10 20% 50%;
+
+    --accent: 35 55% 73%;            /* Caramel #E8C99B */
+    --accent-foreground: 10 35% 19%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 20% 87%;
+    --input: 30 20% 87%;
+    --ring: 5 43% 60%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+
+  /* Focus visible for accessibility */
+  :focus-visible {
+    @apply outline-2 outline-primary outline-offset-2;
+  }
+
+  /* Remove default focus ring for mouse users */
+  :focus:not(:focus-visible) {
+    @apply outline-none;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/50;
+  }
+}
+
+@layer components {
+  /* Section container */
+  .section-container {
+    @apply container mx-auto px-4 py-12 md:py-16 lg:py-20;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply font-display text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground;
+  }
+
+  /* Section subheading */
+  .section-subheading {
+    @apply font-sans text-muted-foreground mt-3 text-base md:text-lg max-w-2xl;
+  }
+
+  /* Product card image */
+  .product-image-wrapper {
+    @apply relative overflow-hidden bg-secondary rounded-t-lg aspect-square;
+  }
+
+  /* Admin page header */
+  .admin-page-header {
+    @apply flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6;
+  }
+
+  /* Shimmer skeleton animation */
+  .skeleton {
+    @apply bg-gradient-to-r from-muted via-secondary to-muted bg-[length:400%_100%] animate-shimmer rounded;
+  }
+
+  /* Order status timeline */
+  .order-timeline-step {
+    @apply flex items-start gap-3;
+  }
+
+  .order-timeline-step.active .step-icon {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .order-timeline-step.completed .step-icon {
+    @apply bg-green-500 text-white;
+  }
+
+  .order-timeline-step.pending .step-icon {
+    @apply bg-muted text-muted-foreground;
+  }
+}
+
+@layer utilities {
+  /* Text balance for headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Glass morphism */
+  .glass {
+    @apply backdrop-blur-md bg-white/80 border border-white/20;
+  }
+}
