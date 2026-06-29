@@ -138,8 +138,30 @@ export async function addToCart(
 }
 
 export async function removeFromCart(itemId: string): Promise<ActionResult<void>> {
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get(CART_SESSION_COOKIE)?.value
+  if (!sessionId) return { success: false, error: 'Cart not found.' }
+
   const admin = createAdminClient()
-  const { error } = await admin.from('cart_items').delete().eq('id', itemId)
+
+  // Ownership check: only allow deleting an item that belongs to
+  // THIS session's own cart. Without the .eq('cart_id', cart.id)
+  // below, any visitor who knows (or guesses) a cart_items.id
+  // UUID could remove items from someone else's cart (IDOR).
+  const { data: cart } = await admin
+    .from('carts')
+    .select('id')
+    .eq('session_id', sessionId)
+    .single()
+
+  if (!cart) return { success: false, error: 'Cart not found.' }
+
+  const { error } = await admin
+    .from('cart_items')
+    .delete()
+    .eq('id', itemId)
+    .eq('cart_id', cart.id)
+
   if (error) return { success: false, error: 'Failed to remove item from cart.' }
   return { success: true, data: undefined }
 }
@@ -152,11 +174,26 @@ export async function updateCartItemQuantity(
     return { success: false, error: 'Invalid quantity' }
   }
 
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get(CART_SESSION_COOKIE)?.value
+  if (!sessionId) return { success: false, error: 'Cart not found.' }
+
   const admin = createAdminClient()
+
+  // Ownership check — see comment in removeFromCart() above.
+  const { data: cart } = await admin
+    .from('carts')
+    .select('id')
+    .eq('session_id', sessionId)
+    .single()
+
+  if (!cart) return { success: false, error: 'Cart not found.' }
+
   const { error } = await admin
     .from('cart_items')
     .update({ quantity })
     .eq('id', itemId)
+    .eq('cart_id', cart.id)
 
   if (error) return { success: false, error: 'Failed to update quantity.' }
   return { success: true, data: undefined }
