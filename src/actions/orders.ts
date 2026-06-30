@@ -61,6 +61,26 @@ export async function createOrder(
   const { data: { user } } = await supabase.auth.getUser()
   const admin = createAdminClient()
 
+  // ------------------------------------------------------------
+  // Look up the zone server-side instead of trusting a name sent
+  // from the client — this confirms the id is real and still
+  // active (an admin may have deactivated/deleted it moments ago),
+  // and gives us the name to snapshot onto the order.
+  // ------------------------------------------------------------
+  const { data: zone } = await admin
+    .from('delivery_zones')
+    .select('id, name')
+    .eq('id', parsed.data.delivery_zone_id)
+    .eq('is_active', true)
+    .single()
+
+  if (!zone) {
+    return {
+      success: false,
+      error: 'The selected delivery area is no longer available. Please choose another one.',
+    }
+  }
+
   let screenshotUrl = ''
 
   // ስክሪንሾት መጫን
@@ -92,6 +112,8 @@ export async function createOrder(
       user_id: user?.id ?? null,
       customer_name: parsed.data.full_name,
       customer_phone: parsed.data.phone,
+      delivery_zone_id: zone.id,
+      delivery_zone_name: zone.name,
       delivery_address: parsed.data.delivery_address,
       order_note: parsed.data.order_note ?? null,
       payment_method: parsed.data.payment_method,
@@ -142,7 +164,8 @@ export async function createOrder(
 📋 <b>Order:</b> ${escapeHtml(order.order_number)}
 👤 <b>Customer:</b> ${escapeHtml(parsed.data.full_name)}
 📞 <b>Phone:</b> ${escapeHtml(parsed.data.phone)}
-📍 <b>Address:</b> ${escapeHtml(parsed.data.delivery_address)}
+📍 <b>Area:</b> ${escapeHtml(zone.name)}
+🏠 <b>Address:</b> ${escapeHtml(parsed.data.delivery_address)}
 💳 <b>Payment:</b> ${PAYMENT_METHOD_LABELS[parsed.data.payment_method] ?? parsed.data.payment_method}
 💰 <b>Total:</b> ${formatPrice(totalAmount)}
     `.trim()
@@ -162,6 +185,8 @@ export async function createOrder(
             user_id: user?.id ?? null,
             customer_name: parsed.data.full_name,
             customer_phone: parsed.data.phone,
+            delivery_zone_id: zone.id,
+            delivery_zone_name: zone.name,
             delivery_address: parsed.data.delivery_address,
             order_note: parsed.data.order_note ?? null,
             payment_method: parsed.data.payment_method,
