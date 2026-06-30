@@ -4,19 +4,20 @@ import { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, CreditCard, Banknote, Smartphone, Upload, CheckCircle2, XCircle } from 'lucide-react'
+import { Loader2, CreditCard, Banknote, Smartphone, Upload, CheckCircle2, XCircle, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createOrder } from '@/actions/orders'
 import { checkoutSchema, type CheckoutFormValues } from '@/lib/validations'
 import { PAYMENT_METHOD_LABELS, formatPrice } from '@/lib/utils'
 import { useCart } from '@/contexts/CartContext'
 import { cn } from '@/lib/utils'
-import type { SiteSettings } from '@/types'
+import type { SiteSettings, DeliveryZone } from '@/types'
 import Image from 'next/image'
 import { compressImage } from '@/lib/compressImage' // ✅ ተጨምሯል
 
@@ -28,9 +29,10 @@ const PAYMENT_ICONS = {
 
 interface CheckoutFormProps {
   settings: SiteSettings
+  deliveryZones: DeliveryZone[]
 }
 
-export function CheckoutForm({ settings }: CheckoutFormProps) {
+export function CheckoutForm({ settings, deliveryZones }: CheckoutFormProps) {
   const router = useRouter()
   const { items, totalAmount, clearCart, refresh } = useCart()
   const [isPending, startTransition] = useTransition()
@@ -113,8 +115,38 @@ export function CheckoutForm({ settings }: CheckoutFormProps) {
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label>Delivery Address *</Label>
-          <Textarea {...register('delivery_address')} className="h-24" />
+          <Label>Delivery Area / Zone *</Label>
+          {deliveryZones.length === 0 ? (
+            <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
+              No delivery areas are available right now. Please contact us directly to place this order.
+            </p>
+          ) : (
+            <Select
+              value={watch('delivery_zone_id')}
+              onValueChange={(v) => setValue('delivery_zone_id', v, { shouldValidate: true })}
+            >
+              <SelectTrigger className={errors.delivery_zone_id ? 'border-destructive' : ''}>
+                <SelectValue placeholder="Select your area..." />
+              </SelectTrigger>
+              <SelectContent>
+                {deliveryZones.map((zone) => (
+                  <SelectItem key={zone.id} value={zone.id}>{zone.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {errors.delivery_zone_id && <p className="text-xs text-destructive">{errors.delivery_zone_id.message}</p>}
+        </div>
+        <div className="space-y-1.5">
+          <Label>Specific Address / Landmark *</Label>
+          <Textarea
+            placeholder="House/compound description, nearest landmark, floor number, etc."
+            {...register('delivery_address')}
+            className="h-24"
+          />
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> Helps our delivery person find you within the selected area.
+          </p>
           {errors.delivery_address && <p className="text-xs text-destructive">{errors.delivery_address.message}</p>}
         </div>
         <div className="space-y-1.5">
@@ -181,7 +213,7 @@ export function CheckoutForm({ settings }: CheckoutFormProps) {
         <div className="flex justify-between items-center"><span className="font-semibold">Total</span><span className="font-display text-2xl font-bold text-foreground">{formatPrice(totalAmount)}</span></div>
       </div>
 
-      <Button type="submit" size="xl" className="w-full" disabled={isPending || items.length === 0}>
+      <Button type="submit" size="xl" className="w-full" disabled={isPending || items.length === 0 || deliveryZones.length === 0}>
         {isPending ? <><Loader2 className="h-5 w-5 animate-spin" /> Placing Order...</> : `Place Order — ${formatPrice(totalAmount)}`}
       </Button>
       <p className="text-xs text-muted-foreground text-center">By placing your order, you agree to be contacted by our team to confirm delivery details.</p>
