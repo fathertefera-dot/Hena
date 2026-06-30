@@ -39,9 +39,10 @@ export const checkoutSchema = z.object({
     .min(9, 'Phone number must be at least 9 digits')
     .max(15, 'Phone number is too long')
     .regex(/^[+\d\s\-()]+$/, 'Invalid phone number format'),
+  delivery_zone_id: z.string().uuid('Please select your delivery area'),
   delivery_address: z
     .string()
-    .min(10, 'Please provide a complete delivery address')
+    .min(10, 'Please provide enough detail to find your address (landmark, house no., etc.)')
     .max(500),
   order_note: z.string().max(500, 'Note is too long').optional(),
   payment_method: z.enum(['cash_on_delivery', 'telebirr', 'bank_transfer'], {
@@ -118,6 +119,18 @@ export const categoryFormSchema = z.object({
 })
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>
+
+// ============================================================
+// DELIVERY ZONES
+// ============================================================
+
+export const deliveryZoneFormSchema = z.object({
+  name: z.string().min(2, 'Zone name must be at least 2 characters').max(100),
+  sort_order: z.coerce.number().int().min(0).default(0),
+  is_active: z.boolean().default(true),
+})
+
+export type DeliveryZoneFormValues = z.infer<typeof deliveryZoneFormSchema>
 
 // ============================================================
 // BANNERS
