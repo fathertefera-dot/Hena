@@ -29,50 +29,40 @@ export function BannerCarousel({ banners, settings }: { banners: Banner[]; setti
       {banners.map((banner, idx) => (
         <div
           key={banner.id}
-          className={`absolute inset-0 transition-all duration-1000 ease-out ${
-            idx === current 
-              ? 'opacity-100 z-10 translate-x-0' 
-              : 'opacity-0 z-0 translate-x-4 pointer-events-none'
+          className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+            idx === current ? 'opacity-100 z-10' : 'opacity-0 z-0'
           }`}
         >
           {banner.image_url && (
             <Image
               src={banner.image_url}
-              alt={banner.title ?? 'Hero banner'}
+              alt={banner.title ?? 'Hero'}
               fill
-              className={`object-cover opacity-70 transition-transform duration-[8000ms] ease-out ${
-                idx === current ? 'scale-[1.02]' : 'scale-100'
-              }`}
+              className="object-cover opacity-70 scale-[1.02]"
               priority={idx === 0}
               sizes="100vw"
             />
           )}
-          
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-chocolate/95 via-brand-chocolate/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-chocolate/80 via-brand-chocolate/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/10 to-transparent" />
+
+          <div className={`relative z-20 h-full flex flex-col justify-center px-6 sm:px-10 lg:px-16 container mx-auto transition-all duration-700 ease-out ${
+            idx === current ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
+            <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-4 drop-shadow-md">
+              {settings.business_name}
+            </p>
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white max-w-2xl leading-tight mb-8 drop-shadow-lg">
+              {banner.title ?? 'Handcrafted Cakes Delivered to You'}
+            </h1>
+            <Button size="lg" asChild className="w-fit rounded-xl px-8 py-4 text-lg font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300">
+              <Link href="/products" className="flex items-center gap-2">
+                Order Now <ArrowRight className="h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </div>
       ))}
-
-      <div className="relative z-20 h-full flex flex-col justify-center px-6 sm:px-12 container mx-auto">
-        <div className="max-w-2xl transform transition-all duration-700 delay-100 translate-y-0">
-          <p className="text-primary text-sm md:text-base font-semibold tracking-[0.2em] uppercase mb-4 drop-shadow-sm">
-            {settings.business_name}
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-8 drop-shadow-md">
-            {banners[current]?.title ?? 'Handcrafted Cakes Delivered to You'}
-          </h1>
-          <Button 
-            size="lg" 
-            asChild 
-            className="w-fit rounded-xl px-8 py-6 text-base shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 group"
-          >
-            <Link href="/products" className="flex items-center gap-2">
-              Order Now 
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Button>
-        </div>
-      </div>
 
       {banners.length > 1 && (
         <>
@@ -82,10 +72,8 @@ export function BannerCarousel({ banners, settings }: { banners: Banner[]; setti
                 key={idx}
                 onClick={() => goTo(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`h-1.5 rounded-full transition-all duration-500 ease-out ${
-                  idx === current 
-                    ? 'w-8 bg-primary shadow-[0_0_8px_rgba(255,255,255,0.5)]' 
-                    : 'w-2 bg-white/40 hover:bg-white/80'
+                className={`h-2 rounded-full transition-all duration-500 ease-in-out ${
+                  idx === current ? 'w-10 bg-primary shadow-md' : 'w-2 bg-white/60 hover:bg-white'
                 }`}
               />
             ))}
@@ -93,14 +81,14 @@ export function BannerCarousel({ banners, settings }: { banners: Banner[]; setti
           <button
             onClick={prev}
             aria-label="Previous slide"
-            className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/20 backdrop-blur-md hover:bg-black/40 text-white shadow-sm hover:shadow-md transition-all duration-300 border border-white/10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/20 backdrop-blur-md hover:bg-black/40 text-white shadow-lg transition-all duration-300 hover:scale-110"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={next}
             aria-label="Next slide"
-            className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/20 backdrop-blur-md hover:bg-black/40 text-white shadow-sm hover:shadow-md transition-all duration-300 border border-white/10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/20 backdrop-blur-md hover:bg-black/40 text-white shadow-lg transition-all duration-300 hover:scale-110"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
