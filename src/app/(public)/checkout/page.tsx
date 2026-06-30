@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { CheckoutForm } from '@/components/checkout/CheckoutForm'
 import { getSettings } from '@/actions/settings'
 import { getCart } from '@/actions/cart'
+import { getActiveDeliveryZones } from '@/actions/delivery-zones'
 
 export const metadata: Metadata = {
   title: 'Checkout',
@@ -10,9 +11,10 @@ export const metadata: Metadata = {
 }
 
 export default async function CheckoutPage() {
-  const [settings, cartItems] = await Promise.all([
+  const [settings, cartItems, deliveryZones] = await Promise.all([
     getSettings(),
     getCart(),
+    getActiveDeliveryZones(),
   ])
 
   if (cartItems.length === 0) {
@@ -26,7 +28,7 @@ export default async function CheckoutPage() {
         <p className="text-muted-foreground mt-1">Fill in your details to place your order.</p>
       </div>
 
-      <CheckoutForm settings={settings} />
+      <CheckoutForm settings={settings} deliveryZones={deliveryZones} />
     </div>
   )
 }
