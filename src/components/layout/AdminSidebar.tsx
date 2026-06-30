@@ -6,18 +6,19 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, ShoppingBag, Package,
   Tag, Image, Settings, Cake, LogOut, ChevronRight,
-  ChevronLeft
+  ChevronLeft, Truck
 } from 'lucide-react'
 import { logout } from '@/actions/auth'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/admin',              label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/orders',       label: 'Orders',    icon: ShoppingBag },
-  { href: '/admin/products',     label: 'Products',  icon: Package },
-  { href: '/admin/categories',   label: 'Categories',icon: Tag },
-  { href: '/admin/banners',      label: 'Banners',   icon: Image },
-  { href: '/admin/settings',     label: 'Settings',  icon: Settings },
+  { href: '/admin',               label: 'Dashboard',      icon: LayoutDashboard, exact: true },
+  { href: '/admin/orders',        label: 'Orders',         icon: ShoppingBag },
+  { href: '/admin/products',      label: 'Products',       icon: Package },
+  { href: '/admin/categories',    label: 'Categories',     icon: Tag },
+  { href: '/admin/banners',       label: 'Banners',        icon: Image },
+  { href: '/admin/delivery-zones',label: 'Delivery Zones', icon: Truck },
+  { href: '/admin/settings',      label: 'Settings',       icon: Settings },
 ]
 
 function NavItem({
