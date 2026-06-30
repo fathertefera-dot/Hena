@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { settingsSchema } from '@/lib/validations'
@@ -94,6 +95,17 @@ export async function updateSettings(formData: unknown): Promise<ActionResult<vo
     console.error('[Settings] Failed to update settings:', error)
     return { success: false, error: 'Failed to update settings. Please try again.' }
   }
+
+  // ------------------------------------------------------------
+  // CRITICAL: without this, the homepage / checkout / root layout
+  // keep serving the OLD settings (business name, payment toggles,
+  // meta tags) until the next deploy, because Next.js caches the
+  // rendered output of these routes. revalidatePath purges that
+  // cache immediately so the very next request gets fresh data.
+  // 'layout' tells Next to also bust every nested page under it.
+  // ------------------------------------------------------------
+  revalidatePath('/', 'layout')
+  revalidatePath('/admin/settings')
 
   return { success: true, data: undefined, message: 'Settings updated successfully' }
 }
