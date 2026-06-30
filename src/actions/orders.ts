@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkoutSchema, orderStatusSchema } from '@/lib/validations'
 import { requireAdmin } from '@/actions/auth'
+import { getSettings } from '@/actions/settings'
 import { clearCart, getCart } from '@/actions/cart'
 import { sendNewOrderNotification, sendOrderStatusUpdateNotification, sendTelegramPhoto, escapeHtml } from '@/lib/telegram'
 import { ORDERS_PER_PAGE } from '@/lib/utils'
@@ -27,6 +28,28 @@ export async function createOrder(
   const cartItems = await getCart()
   if (cartItems.length === 0) {
     return { success: false, error: 'Your cart is empty.' }
+  }
+
+  // ------------------------------------------------------------
+  // Server-side enforcement of the admin payment-method toggles.
+  // The checkout UI hides disabled methods, but that's a client-side
+  // convenience only — without this check, someone could call
+  // createOrder() directly (devtools / API client) with a
+  // payment_method the admin has turned OFF (e.g. Telebirr disabled
+  // for maintenance) and it would still go through.
+  // ------------------------------------------------------------
+  const settings = await getSettings()
+  const paymentMethodEnabled: Record<typeof parsed.data.payment_method, boolean> = {
+    cash_on_delivery: settings.payment_cod,
+    telebirr: settings.payment_telebirr,
+    bank_transfer: settings.payment_bank_transfer,
+  }
+
+  if (!paymentMethodEnabled[parsed.data.payment_method]) {
+    return {
+      success: false,
+      error: 'This payment method is currently unavailable. Please choose a different one.',
+    }
   }
 
   const totalAmount = cartItems.reduce(
