@@ -7,6 +7,12 @@ import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import InstallPrompt from '@/components/InstallPrompt'
 import './globals.css'
 
+// Force every route under this layout to be dynamically rendered on
+// every request — settings, products, banners, etc. must never be
+// served from a stale build-time snapshot.
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
