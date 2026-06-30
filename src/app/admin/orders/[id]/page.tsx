@@ -139,8 +139,12 @@ export default function AdminOrderDetailPage({ params }: OrderDetailPageProps) {
                   {order.customer_phone}
                 </a>
               </div>
+              <div>
+                <p className="text-muted-foreground mb-1">Delivery Area</p>
+                <p className="font-medium">{order.delivery_zone_name ?? '—'}</p>
+              </div>
               <div className="sm:col-span-2">
-                <p className="text-muted-foreground mb-1">Delivery Address</p>
+                <p className="text-muted-foreground mb-1">Specific Address / Landmark</p>
                 <p className="font-medium">{order.delivery_address}</p>
               </div>
               <div>
