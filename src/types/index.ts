@@ -33,6 +33,15 @@ export interface Category {
   updated_at: string
 }
 
+export interface DeliveryZone {
+  id: string
+  name: string
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface ProductImage {
   id: string
   product_id: string
@@ -104,6 +113,8 @@ export interface Order {
   customer_name: string
   customer_phone: string
   delivery_address: string
+  delivery_zone_id: string | null
+  delivery_zone_name: string | null
   order_note: string | null
   payment_method: PaymentMethod
   status: OrderStatus
@@ -203,6 +214,12 @@ export interface ProductFormData {
 export interface CategoryFormData {
   name: string
   slug: string
+  sort_order: number
+  is_active: boolean
+}
+
+export interface DeliveryZoneFormData {
+  name: string
   sort_order: number
   is_active: boolean
 }
