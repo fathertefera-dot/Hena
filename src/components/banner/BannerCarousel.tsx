@@ -7,22 +7,14 @@ import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Banner, SiteSettings } from '@/types'
 
-export function BannerCarousel({
-  banners,
-  settings,
-}: {
-  banners: Banner[]
-  settings: SiteSettings
-}) {
+export function BannerCarousel({ banners, settings }: { banners: Banner[]; settings: SiteSettings }) {
   const [current, setCurrent] = useState(0)
 
   useEffect(() => {
     if (banners.length <= 1) return
-
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % banners.length)
     }, 6000)
-
     return () => clearInterval(timer)
   }, [banners.length])
 
@@ -38,9 +30,7 @@ export function BannerCarousel({
         <div
           key={banner.id}
           className={`absolute inset-0 transition-all duration-700 ease-out ${
-            idx === current
-              ? 'opacity-100 translate-y-0 z-10'
-              : 'opacity-0 translate-y-1 z-0'
+            idx === current ? 'opacity-100 z-10 translate-y-0' : 'opacity-0 z-0 translate-y-4'
           }`}
         >
           {banner.image_url && (
@@ -48,80 +38,54 @@ export function BannerCarousel({
               src={banner.image_url}
               alt={banner.title ?? 'Hero'}
               fill
+              className="object-cover opacity-70 scale-[1.02]"
               priority={idx === 0}
               sizes="100vw"
-              className="object-cover opacity-70 scale-[1.02] transition-transform duration-[6000ms] ease-linear"
             />
           )}
-
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-chocolate via-brand-chocolate/45 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-chocolate/90 via-brand-chocolate/55 to-transparent" />
-          <div className="absolute inset-0 bg-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         </div>
       ))}
 
-      <div className="relative z-20 flex h-full items-center">
-        <div className="container mx-auto px-5 sm:px-8 lg:px-10">
-          <div
-            key={current}
-            className="max-w-2xl animate-in fade-in slide-in-from-bottom-2 duration-500"
-          >
-            <p className="mb-3 text-xs sm:text-sm font-semibold tracking-[0.35em] uppercase text-primary/95">
-              {settings.business_name}
-            </p>
-
-            <h1 className="font-display text-4xl md:text-5xl font-semibold leading-tight tracking-tight text-white drop-shadow-sm">
-              {banners[current]?.title ?? 'Handcrafted Cakes Delivered to You'}
-            </h1>
-
-            <div className="mt-8">
-              <Button
-                size="lg"
-                asChild
-                className="group w-fit rounded-xl px-7 py-6 text-base font-semibold shadow-xl transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl"
-              >
-                <Link
-                  href="/products"
-                  className="flex items-center gap-2"
-                >
-                  Order Now
-                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
+      <div className="relative z-20 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8 container mx-auto">
+        <p className="text-primary text-sm font-medium tracking-widest uppercase mb-3">
+          {settings.business_name}
+        </p>
+        <h1 className="font-display text-4xl md:text-5xl font-semibold text-white max-w-2xl leading-tight mb-6">
+          {banners[current]?.title ?? 'Handcrafted Cakes Delivered to You'}
+        </h1>
+        <Button size="lg" asChild className="w-fit rounded-xl h-14 px-8 text-base font-semibold shadow-lg hover:scale-105 transition-transform duration-300">
+          <Link href="/products" className="flex items-center gap-2">
+            Order Now <ArrowRight className="h-5 w-5" />
+          </Link>
+        </Button>
       </div>
 
       {banners.length > 1 && (
         <>
-          <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {banners.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => goTo(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  idx === current
-                    ? 'w-8 bg-primary'
-                    : 'w-2.5 bg-white/50 hover:w-4 hover:bg-white/80'
+                className={`h-2.5 rounded-full transition-all duration-500 ease-out ${
+                  idx === current ? 'w-8 bg-white' : 'w-2.5 bg-white/50 hover:bg-white/80'
                 }`}
               />
             ))}
           </div>
-
           <button
             onClick={prev}
             aria-label="Previous slide"
-            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/20 p-3 text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-black/40"
+            className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/20 backdrop-blur-md hover:bg-black/40 text-white transition-all duration-300 shadow-lg"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-
           <button
             onClick={next}
             aria-label="Next slide"
-            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/20 p-3 text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-black/40"
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/20 backdrop-blur-md hover:bg-black/40 text-white transition-all duration-300 shadow-lg"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
