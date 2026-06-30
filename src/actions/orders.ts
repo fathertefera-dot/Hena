@@ -214,9 +214,12 @@ export async function trackOrder(
 export async function getAdminOrders(
   filters: OrderFilters = {}
 ): Promise<PaginatedResult<Order>> {
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) {
+    return { data: [], meta: { page: 1, perPage: ORDERS_PER_PAGE, total: 0, totalPages: 0 } }
+  }
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { data: [], meta: { page: 1, perPage: ORDERS_PER_PAGE, total: 0, totalPages: 0 } }
 
   const page = filters.page ?? 1
   const perPage = ORDERS_PER_PAGE
@@ -246,9 +249,10 @@ export async function getAdminOrders(
 }
 
 export async function getAdminOrderById(id: string): Promise<Order | null> {
+  const adminCheck = await requireAdmin()
+  if (!adminCheck.ok) return null
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
   const { data, error } = await supabase
     .from('orders')
     .select(`*, items:order_items(*)`)
