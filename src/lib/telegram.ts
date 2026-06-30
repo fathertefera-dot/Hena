@@ -75,7 +75,8 @@ export async function sendNewOrderNotification(
 📋 <b>Order:</b> ${escapeHtml(order.order_number)}
 👤 <b>Customer:</b> ${escapeHtml(order.customer_name)}
 📞 <b>Phone:</b> ${escapeHtml(order.customer_phone)}
-📍 <b>Address:</b> ${escapeHtml(order.delivery_address)}
+📍 <b>Area:</b> ${escapeHtml(order.delivery_zone_name ?? '—')}
+🏠 <b>Address:</b> ${escapeHtml(order.delivery_address)}
 💳 <b>Payment:</b> ${PAYMENT_METHOD_LABELS[order.payment_method] ?? order.payment_method}
 
 🛒 <b>Items:</b>
