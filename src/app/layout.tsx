@@ -44,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: settings.meta_description || 'Order beautiful custom cakes online.',
     icons: {
       icon: '/favicon.ico',
-      apple: '/apple-touch-icon.png',
+      apple: '/icons/apple-touch-icon.png',
     },
     manifest: '/manifest.webmanifest',
     other: {
