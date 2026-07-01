@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ShoppingCart, Loader2, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
@@ -18,22 +18,42 @@ export function AddToCartForm({ product }: { product: Product }) {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(product.variants?.[0] ?? null)
   const [quantity, setQuantity] = useState(1)
   const [cakeMessage, setCakeMessage] = useState('')
-  const [isPending, startTransition] = useTransition()
+  const [isAdding, setIsAdding] = useState(false)
   const { addItem } = useCart()
 
   const handleAdd = async () => {
-    if (!selectedVariant || isPending) return
-    startTransition(async () => {
-      const result = await addItem(product.id, selectedVariant.id, quantity, cakeMessage.trim() || undefined)
-      if (result.success) {
-        router.push('/cart')
-      } else {
-        toast.error('Failed to Add to Cart', {
-          description: result.error || 'Please try again.',
-          icon: <XCircle className="h-4 w-4 text-destructive" />,
-        })
-      }
-    })
+    if (!selectedVariant || isAdding) return
+
+    setIsAdding(true)
+    // -------------------------------------------------------
+    // Do NOT wrap this in startTransition. Calling router.push
+    // inside startTransition makes Next.js App Router treat the
+    // navigation as a "deferred/non-urgent" transition, which
+    // keeps the source page (shop) as the "current" page until
+    // the transition fully resolves. When the user then taps "+"
+    // on the cart page during that window, React processes the
+    // interaction in the context of the shop page — causing it
+    // to navigate back. Using plain async/await + useState for
+    // the loading indicator avoids this entirely.
+    // -------------------------------------------------------
+    const result = await addItem(
+      product.id,
+      selectedVariant.id,
+      quantity,
+      cakeMessage.trim() || undefined
+    )
+
+    if (result.success) {
+      router.push('/cart')
+      // isAdding stays true intentionally — the component unmounts
+      // on navigation so there's no need to reset it.
+    } else {
+      setIsAdding(false)
+      toast.error('Failed to Add to Cart', {
+        description: result.error || 'Please try again.',
+        icon: <XCircle className="h-4 w-4 text-destructive" />,
+      })
+    }
   }
 
   return (
@@ -116,10 +136,10 @@ export function AddToCartForm({ product }: { product: Product }) {
       <Button
         size="xl"
         onClick={handleAdd}
-        disabled={!selectedVariant || isPending}
+        disabled={!selectedVariant || isAdding}
         className="w-full"
       >
-        {isPending ? (
+        {isAdding ? (
           <><Loader2 className="h-5 w-5 animate-spin" /> Adding to Cart...</>
         ) : (
           <><ShoppingCart className="h-5 w-5" /> Add to Cart{selectedVariant && ` — ${formatPrice(selectedVariant.price * quantity)}`}</>
