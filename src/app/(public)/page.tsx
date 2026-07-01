@@ -45,72 +45,76 @@ function HeroSection({ banners, settings }: { banners: Banner[]; settings: SiteS
 }
 
 // ============================================================
-// CATEGORIES SECTION (Redesigned - Premium UI)
+// CATEGORIES SECTION — Premium / Apple × Shopify × Stripe UI
 // ============================================================
 
 function CategoriesSection({ categories }: { categories: Category[] }) {
   return (
-    <section className="container mx-auto px-4 py-12 md:py-16">
+    <section className="container mx-auto px-4 py-14 md:py-20">
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-        <div className="max-w-2xl">
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+      <div className="flex items-end justify-between mb-8 md:mb-10">
+        <div className="space-y-1.5">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
             Shop by Category
           </h2>
-          <p className="mt-3 text-base md:text-lg text-muted-foreground font-medium">
+          <p className="text-sm md:text-base text-muted-foreground">
             Discover handcrafted cakes for every celebration.
           </p>
         </div>
-        
+
         <Link
           href="/products"
-          className="group inline-flex w-fit items-center justify-center gap-2 rounded-full bg-secondary/70 px-6 py-2.5 text-sm font-semibold text-secondary-foreground backdrop-blur-md border border-border/50 shadow-sm transition-all duration-300 ease-out hover:bg-secondary hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 shrink-0"
         >
           View All
-          <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
-      {/* Categories Grid (Mobile: 2, Tablet: 3, Desktop: 4) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* Categories Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {categories.map((cat) => (
           <Link
             key={cat.id}
             href={`/products?category=${cat.slug}`}
-            className="group relative flex flex-col overflow-hidden rounded-3xl bg-card/60 backdrop-blur-xl border border-border/50 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.12)]"
+            className="group relative flex flex-col rounded-3xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-8px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-border hover:shadow-[0_2px_4px_rgba(0,0,0,0.06),0_20px_40px_-12px_rgba(0,0,0,0.16)] overflow-hidden"
           >
-            {/* Image Container */}
-            <div className="relative aspect-[5/4] w-full overflow-hidden bg-muted/30">
+            {/* Image */}
+            <div className="relative aspect-[5/4] overflow-hidden rounded-t-3xl bg-muted">
               {cat.image_url ? (
                 <Image
                   src={cat.image_url}
                   alt={cat.name}
                   fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
-                  <span className="text-5xl drop-shadow-sm">🎂</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-accent/10 to-primary/15 flex items-center justify-center">
+                  <span className="text-4xl">🎂</span>
                 </div>
               )}
 
-              {/* Bottom Gradient Overlay for depth and premium feel */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
+              {/* Bottom gradient for readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0" />
 
-              {/* Soft Shine Effect Animation */}
-              <div className="pointer-events-none absolute inset-0 -translate-x-[150%] skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-[1.5s] ease-in-out group-hover:translate-x-[150%] z-10" />
+              {/* Soft shine sweep on hover */}
+              <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-[1100ms] ease-out bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+              {/* Subtle top glass highlight */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
 
-            {/* Text Content Block */}
-            <div className="flex grow flex-col justify-between p-5 sm:p-6 bg-gradient-to-b from-transparent to-background/50">
-              <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary line-clamp-1">
-                {cat.name}
-              </h3>
-              
-              <div className="mt-3 flex items-center text-sm font-medium text-muted-foreground/80 transition-colors group-hover:text-foreground">
-                <span>Explore Collection</span>
-                <ArrowRight className="ml-1.5 h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+            {/* Text */}
+            <div className="flex items-center justify-between gap-2 px-4 py-3.5">
+              <div className="min-w-0">
+                <p className="text-sm md:text-base font-semibold text-foreground truncate">
+                  {cat.name}
+                </p>
+                <span className="text-xs text-muted-foreground inline-flex items-center gap-1 transition-colors duration-200 group-hover:text-primary">
+                  Explore Collection
+                  <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
+                </span>
               </div>
             </div>
           </Link>
