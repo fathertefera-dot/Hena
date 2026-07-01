@@ -101,7 +101,7 @@ export function AddToCartForm({ product }: { product: Product }) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            disabled={isPending}
+            disabled={isAdding}
             className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50"
           >
             −
@@ -109,7 +109,7 @@ export function AddToCartForm({ product }: { product: Product }) {
           <span className="w-10 text-center font-semibold text-lg">{quantity}</span>
           <button
             onClick={() => setQuantity((q) => Math.min(99, q + 1))}
-            disabled={isPending}
+            disabled={isAdding}
             className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50"
           >
             +
