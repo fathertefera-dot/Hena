@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { ShoppingCart, Loader2, Check, CheckCircle2, XCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ShoppingCart, Loader2, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,6 +14,7 @@ import { cn } from '@/lib/utils'
 import type { Product, ProductVariant } from '@/types'
 
 export function AddToCartForm({ product }: { product: Product }) {
+  const router = useRouter()
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(product.variants?.[0] ?? null)
   const [quantity, setQuantity] = useState(1)
   const [cakeMessage, setCakeMessage] = useState('')
@@ -20,14 +22,11 @@ export function AddToCartForm({ product }: { product: Product }) {
   const { addItem } = useCart()
 
   const handleAdd = async () => {
-    if (!selectedVariant) return
+    if (!selectedVariant || isPending) return
     startTransition(async () => {
       const result = await addItem(product.id, selectedVariant.id, quantity, cakeMessage.trim() || undefined)
       if (result.success) {
-        toast.success('Added to Cart!', {
-          description: `${quantity} × ${product.name} (${selectedVariant.name}) added.`,
-          icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
-        })
+        router.push('/cart')
       } else {
         toast.error('Failed to Add to Cart', {
           description: result.error || 'Please try again.',
@@ -45,7 +44,8 @@ export function AddToCartForm({ product }: { product: Product }) {
           {AVAILABILITY_LABELS[product.availability]}
         </span>
       </div>
-      {product.variants && product.variants.length > 0 && ( // ✅ ተስተካክሏል
+
+      {product.variants && product.variants.length > 0 && (
         <div>
           <Label className="text-sm font-semibold mb-3 block">Select Size / Weight</Label>
           <div className="flex flex-wrap gap-2">
@@ -67,32 +67,62 @@ export function AddToCartForm({ product }: { product: Product }) {
           </div>
         </div>
       )}
+
       <div className="flex items-baseline gap-2 py-3 border-y border-border">
         <span className="text-sm text-muted-foreground">Price:</span>
         <span className="font-display text-2xl font-bold">{formatPrice(selectedVariant ? selectedVariant.price * quantity : 0)}</span>
-        {quantity > 1 && <span className="text-sm text-muted-foreground">({formatPrice(selectedVariant?.price ?? 0)} × {quantity})</span>}
+        {quantity > 1 && (
+          <span className="text-sm text-muted-foreground">({formatPrice(selectedVariant?.price ?? 0)} × {quantity})</span>
+        )}
       </div>
+
       <div>
         <Label className="text-sm font-semibold mb-3 block">Quantity</Label>
         <div className="flex items-center gap-3">
-          <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors">−</button>
+          <button
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            disabled={isPending}
+            className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50"
+          >
+            −
+          </button>
           <span className="w-10 text-center font-semibold text-lg">{quantity}</span>
-          <button onClick={() => setQuantity((q) => Math.min(99, q + 1))} className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors">+</button>
+          <button
+            onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+            disabled={isPending}
+            className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50"
+          >
+            +
+          </button>
         </div>
       </div>
+
       <div>
         <Label htmlFor="message" className="text-sm font-semibold mb-1.5 flex items-center gap-2">
           Cake Message <Badge variant="outline" className="text-[10px] font-normal">Optional</Badge>
         </Label>
         <p className="text-xs text-muted-foreground mb-2">Add a personal message to be written on your cake.</p>
-        <Textarea id="message" placeholder="e.g. Happy Birthday Sarah! 🎉" value={cakeMessage} onChange={(e) => setCakeMessage(e.target.value.slice(0, 100))} className="resize-none h-20" maxLength={100} />
+        <Textarea
+          id="message"
+          placeholder="e.g. Happy Birthday Sarah! 🎉"
+          value={cakeMessage}
+          onChange={(e) => setCakeMessage(e.target.value.slice(0, 100))}
+          className="resize-none h-20"
+          maxLength={100}
+        />
         <p className="text-xs text-muted-foreground mt-1 text-right">{cakeMessage.length}/100</p>
       </div>
-      <Button size="xl" onClick={handleAdd} disabled={!selectedVariant || isPending} className="w-full">
+
+      <Button
+        size="xl"
+        onClick={handleAdd}
+        disabled={!selectedVariant || isPending}
+        className="w-full"
+      >
         {isPending ? (
-          <><Loader2 className="h-5 w-5 animate-spin" /> Adding...</>
+          <><Loader2 className="h-5 w-5 animate-spin" /> Adding to Cart...</>
         ) : (
-          <><ShoppingCart className="h-5 w-5" /> Add to Cart {selectedVariant && ` — ${formatPrice(selectedVariant.price * quantity)}`}</>
+          <><ShoppingCart className="h-5 w-5" /> Add to Cart{selectedVariant && ` — ${formatPrice(selectedVariant.price * quantity)}`}</>
         )}
       </Button>
     </div>
