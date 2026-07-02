@@ -47,15 +47,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     ): Promise<ActionResult<void>> => {
       const result = await addToCart(productId, variantId, quantity, cakeMessage)
       if (result.success) {
-        // Call refresh() directly — without startTransition.
-        // Previously, wrapping this in startTransition made setIsLoading(true)
-        // a deferred (low-priority) update. React could render the cart page
-        // before that update applied, briefly showing isLoading=false + items=[]
-        // (the empty state with "Browse Cakes → /products"). If the user tapped
-        // anywhere in that window they'd be sent to /products. Calling refresh()
-        // directly makes setIsLoading(true) a normal high-priority update, so
-        // the spinner always shows immediately on navigation.
-        refresh()
+        // IMPORTANT: await refresh() here so the cart data is fully loaded
+        // and committed to state BEFORE addItem() returns. The caller
+        // (AddToCartForm) calls router.push('/cart') right after this returns.
+        // If we don't await, router.push triggers while React still has a
+        // pending state update (setIsLoading / setItems), which Next.js App
+        // Router turns into an internal React transition. When the user then
+        // taps "+" on the cart page during that pending transition window,
+        // React cancels the speculative render and reverts to the last
+        // committed page (/products). Awaiting here means by the time
+        // router.push runs, the cart state is already committed — no
+        // pending transition, no revert.
+        await refresh()
       }
       return result
     },
