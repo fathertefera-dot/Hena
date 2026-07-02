@@ -6,7 +6,6 @@ import {
   useContext,
   useEffect,
   useState,
-  useTransition,
 } from 'react'
 import {
   addToCart,
@@ -22,7 +21,6 @@ const CartContext = createContext<CartContextValue | null>(null)
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItemWithDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [, startTransition] = useTransition()
 
   const refresh = useCallback(async () => {
     setIsLoading(true)
@@ -49,9 +47,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     ): Promise<ActionResult<void>> => {
       const result = await addToCart(productId, variantId, quantity, cakeMessage)
       if (result.success) {
-        startTransition(() => {
-          refresh()
-        })
+        // Call refresh() directly — without startTransition.
+        // Previously, wrapping this in startTransition made setIsLoading(true)
+        // a deferred (low-priority) update. React could render the cart page
+        // before that update applied, briefly showing isLoading=false + items=[]
+        // (the empty state with "Browse Cakes → /products"). If the user tapped
+        // anywhere in that window they'd be sent to /products. Calling refresh()
+        // directly makes setIsLoading(true) a normal high-priority update, so
+        // the spinner always shows immediately on navigation.
+        refresh()
       }
       return result
     },
